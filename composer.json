@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
+    "name": "m4tini/advent-of-code",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "My solutions for https://adventofcode.com",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
