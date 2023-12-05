@@ -36,7 +36,7 @@ TEXT;
     {
         $data = $this->option('input') ?? $this->data;
         $dataLines = explode(PHP_EOL, $data);
-        $result = 0;
+        $sum = 0;
 
         foreach ($dataLines as $line) {
             // Replace all numbers to their string representation (to properly support input like `5eightwo`).
@@ -65,9 +65,9 @@ TEXT;
                 $this->comment($number . ' - ' . $line);
             }
 
-            $result += $number;
+            $sum += $number;
         }
 
-        $this->info($result); // 54418
+        $this->info('Calibration value sum: ' . $sum);
     }
 }

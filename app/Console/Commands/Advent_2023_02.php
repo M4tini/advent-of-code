@@ -22,7 +22,8 @@ TEXT;
     {
         $data = $this->option('input') ?? $this->data;
         $dataLines = explode(PHP_EOL, $data);
-        $result = 0;
+        $possibleGameSum = 0;
+        $powerSumAllSets = 0;
 
         foreach ($dataLines as $line) {
             if ($this->option('debug')) {
@@ -32,28 +33,49 @@ TEXT;
             $gameData = explode(':', $line);
             $gameNumber = (int) preg_replace('/\D/', '', $gameData[0]);
             $gameRounds = explode(';', $gameData[1]);
-            $possible = true;
+            $gameAnalysis = [
+                'possible'  => true,
+                'max_red'   => 0,
+                'max_green' => 0,
+                'max_blue'  => 0,
+            ];
 
             foreach ($gameRounds as $gameRound) {
-                if (!$this->isPossible($gameRound)) {
-                    $possible = false;
+                $roundAnalysis = $this->analyzeRound($gameRound);
+
+                if (!$roundAnalysis['possible']) {
+                    $gameAnalysis['possible'] = false;
+                }
+                foreach (['max_red', 'max_green', 'max_blue'] as $color) {
+                    if ($gameAnalysis[$color] < $roundAnalysis[$color]) {
+                        $gameAnalysis[$color] = $roundAnalysis[$color];
+                    }
                 }
             }
 
-            if ($possible) {
-                $result += $gameNumber;
+            if ($gameAnalysis['possible']) {
+                $possibleGameSum += $gameNumber;
             }
+            $powerSumAllSets += ($gameAnalysis['max_red'] * $gameAnalysis['max_green'] * $gameAnalysis['max_blue']);
 
             if ($this->option('debug')) {
-                $this->info($possible ? 'possible' : 'impossible');
+                $this->info($gameAnalysis['possible'] ? 'possible' : 'impossible');
             }
         }
 
-        $this->info($result); // 2085
+        $this->info('Sum of possible games: ' . $possibleGameSum);
+        $this->info('Power sum of all sets: ' . $powerSumAllSets);
     }
 
-    private function isPossible(string $gameRound): bool
+    private function analyzeRound(string $gameRound): array
     {
+        $roundAnalysis = [
+            'possible'  => true,
+            'max_red'   => 0,
+            'max_green' => 0,
+            'max_blue'  => 0,
+        ];
+
         $rolls = explode(';', $gameRound);
 
         foreach ($rolls as $roll) {
@@ -63,29 +85,32 @@ TEXT;
                 [$colorCount, $colorName] = explode(' ', trim($color));
 
                 if ($this->option('debug')) {
-                    $this->comment($roll . ' - ' . $color . ' - ' . $colorCount . ' - ' . $colorName);
+                    $this->comment($roll . ' - ' . $colorCount . ' - ' . $colorName);
                 }
 
                 switch ($colorName) {
                     case 'red':
                         if ($colorCount > 12) {
-                            return false;
+                            $roundAnalysis['possible'] = false;
                         }
+                        $roundAnalysis['max_red'] = $colorCount;
                         break;
                     case 'green':
                         if ($colorCount > 13) {
-                            return false;
+                            $roundAnalysis['possible'] = false;
                         }
+                        $roundAnalysis['max_green'] = $colorCount;
                         break;
                     case 'blue':
                         if ($colorCount > 14) {
-                            return false;
+                            $roundAnalysis['possible'] = false;
                         }
+                        $roundAnalysis['max_blue'] = $colorCount;
                         break;
                 }
             }
         }
 
-        return true;
+        return $roundAnalysis;
     }
 }
