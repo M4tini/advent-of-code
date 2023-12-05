@@ -36,38 +36,38 @@ TEXT;
     {
         $data = $this->option('input') ?? $this->data;
         $dataLines = explode(PHP_EOL, $data);
-        $sum = 0;
+        $result = 0;
 
-        foreach ($dataLines as $data) {
+        foreach ($dataLines as $line) {
             // Replace all numbers to their string representation (to properly support input like `5eightwo`).
             foreach ($this->replacements as $replacement) {
-                $data = str_replace($replacement[1], $replacement[0], $data);
+                $line = str_replace($replacement[1], $replacement[0], $line);
             }
 
             $replacements = collect($this->replacements)
-                ->filter(fn (array $replacement) => str_contains($data, $replacement[0]));
+                ->filter(fn (array $replacement) => str_contains($line, $replacement[0]));
 
             if ($replacements->count()) {
                 // Replace the first occurrence of the first found letter string.
-                $first = $replacements->sortBy(fn (array $replacement) => strpos($data, $replacement[0]))->first();
-                $data = preg_replace("/{$first[0]}/", $first[1], $data, 1);
+                $first = $replacements->sortBy(fn (array $replacement) => strpos($line, $replacement[0]))->first();
+                $line = preg_replace("/{$first[0]}/", $first[1], $line, 1);
 
                 // Replace all occurrences of the last found letter string.
-                $last = $replacements->sortBy(fn (array $replacement) => strrpos($data, $replacement[0]))->last();
-                $data = preg_replace("/{$last[0]}/", $last[1], $data);
+                $last = $replacements->sortBy(fn (array $replacement) => strrpos($line, $replacement[0]))->last();
+                $line = preg_replace("/{$last[0]}/", $last[1], $line);
             }
 
-            $numeric = preg_replace('/\D/', '', $data);
+            $numeric = preg_replace('/\D/', '', $line);
 
-            $num = intval(substr($numeric, 0, 1) . substr($numeric, -1, 1));
+            $number = intval(substr($numeric, 0, 1) . substr($numeric, -1, 1));
 
             if ($this->option('debug')) {
-                $this->comment($num . ' -- ' . $data);
+                $this->comment($number . ' - ' . $line);
             }
 
-            $sum += $num;
+            $result += $number;
         }
 
-        $this->info($sum); // 54418
+        $this->info($result); // 54418
     }
 }
