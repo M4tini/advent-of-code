@@ -27,14 +27,18 @@ TEXT;
         $data = $this->option('input') ?? $this->data;
         $dataLines = explode(PHP_EOL, $data);
         $totalPoints = 0;
+        $cardCount = array_fill(1, count($dataLines), 1);
 
         foreach ($dataLines as $line) {
-            preg_match('/.+:([\s\d]+)\|([\s\d]+)/', $line, $matches);
-            $winningNumbers = array_filter(explode(' ', $matches[1]));
-            $ownedNumbers = array_filter(explode(' ', $matches[2]));
+            preg_match('/\D+(\d+):([\s\d]+)\|([\s\d]+)/', $line, $matches);
+            $cardNumber = intval($matches[1]);
+            $winningNumbers = array_filter(explode(' ', $matches[2]));
+            $ownedNumbers = array_filter(explode(' ', $matches[3]));
             $points = 0;
+            $cardCopies = 0;
 
             if ($this->option('debug')) {
+                $this->info('Card: ' . $cardNumber);
                 $this->comment('Winning: ' . implode(' ', $winningNumbers));
                 $this->comment('Owned: ' . implode(' ', $ownedNumbers));
             }
@@ -46,12 +50,20 @@ TEXT;
                     } else {
                         $points = 1;
                     }
+                    $cardCopies++;
                 }
+            }
+
+            $this->comment('Copies won: ' . $cardCopies);
+
+            for ($i = $cardNumber + 1; $i <= $cardNumber + $cardCopies; $i++) {
+                $cardCount[$i] += $cardCount[$cardNumber];
             }
 
             $totalPoints += $points;
         }
 
         $this->info('Total points: ' . $totalPoints);
+        $this->info('Total cards: ' . array_sum($cardCount));
     }
 }
