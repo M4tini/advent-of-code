@@ -9,9 +9,9 @@ class Advent_2024_02 extends Command
 {
     protected $signature = 'advent:2024:2 {--debug} {--input=}';
 
-    protected $description = '2024 - Day 1: Red-Nosed Reports';
+    protected $description = '2024 - Day 2: Red-Nosed Reports';
 
-    private string $data = <<<TEXT
+    private string $data = <<<'TEXT'
 7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1

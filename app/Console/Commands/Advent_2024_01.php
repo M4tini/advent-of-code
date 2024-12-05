@@ -10,7 +10,7 @@ class Advent_2024_01 extends Command
 
     protected $description = '2024 - Day 1: Historian Hysteria';
 
-    private string $data = <<<TEXT
+    private string $data = <<<'TEXT'
 3   4
 4   3
 2   5
@@ -41,7 +41,9 @@ TEXT;
             $rightValue = $rightValues[$index];
             $distance += max($leftValue, $rightValue) - min($leftValue, $rightValue);
 
-            $similarRightValues = collect($rightValues)->filter(fn ($rightValue) => $rightValue === $leftValue)->count();
+            $similarRightValues = collect($rightValues)
+                ->filter(fn ($rightValue) => $rightValue === $leftValue)
+                ->count();
             $similarityScore += $leftValue * $similarRightValues;
         }
 
