@@ -13,4 +13,5 @@ sail artisan advent:2023:3 --debug
 sail artisan advent:2023:4 --debug
 
 sail artisan advent:2024:1 --debug
+sail artisan advent:2024:2 --debug
 ```

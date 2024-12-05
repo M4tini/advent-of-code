@@ -25,6 +25,7 @@ TEXT;
         $data = $this->option('input') ?? $this->data;
         $dataLines = explode(PHP_EOL, $data);
         $safeReportCount = 0;
+        $safeReportTolerationCount = 0;
 
         foreach ($dataLines as $line) {
             $report = explode(' ', $line);
@@ -32,9 +33,29 @@ TEXT;
             if ($this->isSafe($report)) {
                 $safeReportCount++;
             }
+            if ($this->isSafe($report) || $this->isSafeWithToleration($report)) {
+                $safeReportTolerationCount++;
+            }
         }
 
         $this->info('Number of safe reports: ' . $safeReportCount);
+        $this->info('Number of safe reports with Problem Dampener: ' . $safeReportTolerationCount);
+    }
+
+    private function isSafeWithToleration(array $report, int $indexToIgnore = 0): bool
+    {
+        if (!isset($report[$indexToIgnore])) {
+            return false;
+        }
+
+        $reportClone = $report;
+        unset($reportClone[$indexToIgnore]);
+
+        if ($this->isSafe(array_values($reportClone))) {
+            return true;
+        }
+
+        return $this->isSafeWithToleration($report, ++$indexToIgnore);
     }
 
     private function isSafe(array $report): bool
