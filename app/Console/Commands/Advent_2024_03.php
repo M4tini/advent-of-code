@@ -12,17 +12,21 @@ class Advent_2024_03 extends Command implements PromptsForMissingInput
     protected $description = '2024 - Day 3: Mull It Over';
 
     private string $data = <<<'TEXT'
-xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
+xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
 TEXT;
 
     public function handle(): void
     {
         $data = $this->option('input') ?? $this->data;
-        $dataLines = explode(PHP_EOL, $data);
+
+        $dataWithoutBreaks = str_replace(PHP_EOL, '', $data);
+        $dataLines = explode('do()', $dataWithoutBreaks);
         $result = 0;
 
         foreach ($dataLines as $line) {
-            preg_match_all('/mul\(\d+,\d+\)/', $line, $matches);
+            $mulsToProcess = explode("don't()", $line)[0];
+
+            preg_match_all('/mul\(\d+,\d+\)/', $mulsToProcess, $matches);
 
             $result += collect($matches[0])
                 ->map(function ($item) {
@@ -33,6 +37,6 @@ TEXT;
                 ->sum();
         }
 
-        $this->info('Result of multiplications: ' . $result);
+        $this->info('Result of enabled multiplications: ' . $result);
     }
 }
