@@ -35,12 +35,17 @@ TEXT;
         sort($leftValues);
         sort($rightValues);
         $distance = 0;
+        $similarityScore = 0;
 
         foreach ($leftValues as $index => $leftValue) {
             $rightValue = $rightValues[$index];
             $distance += max($leftValue, $rightValue) - min($leftValue, $rightValue);
+
+            $similarRightValues = collect($rightValues)->filter(fn ($rightValue) => $rightValue === $leftValue)->count();
+            $similarityScore += $leftValue * $similarRightValues;
         }
 
         $this->info('Total distance between lists: ' . $distance);
+        $this->info('Similarity score: ' . $similarityScore);
     }
 }
