@@ -2,7 +2,12 @@
 
 My solutions for https://adventofcode.com
 
-## 2023
+## Installation
+
+- Run `sail up -d`
+- Run `sail composer install`
+
+## Usage
 
 Run `sail up -d` and then one of the following advent solutions:
 
@@ -15,10 +20,15 @@ sail artisan advent:2023:4 --debug
 sail artisan advent:2024:1
 sail artisan advent:2024:2
 sail artisan advent:2024:3
+sail artisan advent:2024:4 --debug
 ```
 
-Custom puzzle input can be loaded using `--stdin < data.txt`, for example:
+### Options
+
+Custom puzzle input can be loaded from a file using `--stdin`, for example:
 
 ```bash
 sail artisan advent:2024:3 --stdin < input.txt
 ```
+
+Some commands offer `--debug` information to show how the data is being evaluated.
