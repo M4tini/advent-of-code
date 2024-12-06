@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class Advent_2024_01 extends Command
 {
-    protected $signature = 'advent:2024:1 {--debug} {--input=}';
+    protected $signature = 'advent:2024:1 {--stdin}';
 
     protected $description = '2024 - Day 1: Historian Hysteria';
 
@@ -21,7 +21,7 @@ TEXT;
 
     public function handle(): void
     {
-        $data = $this->option('input') ?? $this->data;
+        $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(PHP_EOL, $data);
         $leftValues = [];
         $rightValues = [];

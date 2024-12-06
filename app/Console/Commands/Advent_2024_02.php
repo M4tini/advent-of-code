@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class Advent_2024_02 extends Command
 {
-    protected $signature = 'advent:2024:2 {--debug} {--input=}';
+    protected $signature = 'advent:2024:2 {--stdin}';
 
     protected $description = '2024 - Day 2: Red-Nosed Reports';
 
@@ -22,7 +22,7 @@ TEXT;
 
     public function handle(): void
     {
-        $data = $this->option('input') ?? $this->data;
+        $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(PHP_EOL, $data);
         $safeReportCount = 0;
         $safeReportTolerationCount = 0;

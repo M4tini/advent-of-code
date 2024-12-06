@@ -7,7 +7,7 @@ use Illuminate\Contracts\Console\PromptsForMissingInput;
 
 class Advent_2024_03 extends Command implements PromptsForMissingInput
 {
-    protected $signature = 'advent:2024:3 {--input=}';
+    protected $signature = 'advent:2024:3 {--stdin}';
 
     protected $description = '2024 - Day 3: Mull It Over';
 
@@ -17,8 +17,7 @@ TEXT;
 
     public function handle(): void
     {
-        $data = $this->option('input') ?? $this->data;
-
+        $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataWithoutBreaks = str_replace(PHP_EOL, '', $data);
         $dataLines = explode('do()', $dataWithoutBreaks);
         $result = 0;
