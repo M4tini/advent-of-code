@@ -3,9 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 
-class Advent_2024_04 extends Command implements PromptsForMissingInput
+class Advent_2024_04 extends Command
 {
     protected $signature = 'advent:2024:4 {--debug} {--stdin}';
 
@@ -79,7 +78,7 @@ TEXT;
             $xmasCount += $this->countXmas($line);
         }
 
-        $this->info('Amount of XMAS: ' . $xmasCount);
+        $this->info('Amount of XMAS: ' . $xmasCount); // 2524
     }
 
     private function countXmas(string $line): int

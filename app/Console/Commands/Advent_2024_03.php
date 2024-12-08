@@ -3,9 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 
-class Advent_2024_03 extends Command implements PromptsForMissingInput
+class Advent_2024_03 extends Command
 {
     protected $signature = 'advent:2024:3 {--stdin}';
 

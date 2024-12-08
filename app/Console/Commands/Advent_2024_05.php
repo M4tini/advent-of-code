@@ -3,9 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Console\PromptsForMissingInput;
 
-class Advent_2024_05 extends Command implements PromptsForMissingInput
+class Advent_2024_05 extends Command
 {
     protected $signature = 'advent:2024:5 {--debug} {--stdin}';
 
@@ -85,16 +84,28 @@ TEXT;
             if ($rule[0] === $number) {
                 if (in_array($rule[1], array_slice($updateNumbers, 0, max(0, $index)))) {
                     if ($this->option('debug')) {
-                        $this->comment('Rule ' . implode(' ', $rule) . ' disqualified ' . $number . ' in ' . implode(',', $updateNumbers));
+                        $this->comment(
+                            'Rule ' . implode(' ', $rule) . ' disqualified ' . $number . ' in ' . implode(
+                                ',',
+                                $updateNumbers,
+                            ),
+                        );
                     }
+
                     return false;
                 }
             }
             if ($rule[1] === $number) {
                 if (in_array($rule[0], array_slice($updateNumbers, $index + 1))) {
                     if ($this->option('debug')) {
-                        $this->comment('Rule ' . implode(' ', $rule) . ' disqualified ' . $number . ' in ' . implode(',', $updateNumbers));
+                        $this->comment(
+                            'Rule ' . implode(' ', $rule) . ' disqualified ' . $number . ' in ' . implode(
+                                ',',
+                                $updateNumbers,
+                            ),
+                        );
                     }
+
                     return false;
                 }
             }
