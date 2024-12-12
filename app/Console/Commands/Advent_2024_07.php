@@ -53,6 +53,7 @@ TEXT;
         foreach ($combinations as $combination) {
             $result[] = $number + (int) $combination;
             $result[] = $number * (int) $combination;
+            $result[] = intval($combination . $number);
         }
 
         return $result;
