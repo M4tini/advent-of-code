@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -19,24 +21,33 @@ TEXT;
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $diskMap = str_split($data);
 
-        $block = 0;
+        $id = 0;
         $disk = collect($diskMap)
-            ->map(function (string $char, int $index) use (&$block) {
+            ->flatMap(function (string $char, int $index) use (&$id) {
                 return $index % 2 === 1
-                    ? str_repeat('.', (int) $char)
-                    : str_repeat((string) $block++ % 10, (int) $char); // TODO: remove modulo to work with 10 etc
-            })
-            ->join('');
+                    ? array_fill(0, (int) $char, '.')
+                    : array_fill(0, (int) $char, $id++);
+            });
 
-        while (str_contains($disk, '.')) {
-            $this->option('debug') && $this->comment($disk);
+        $arrayToReduce = $disk->toArray();
+        $dotsToReplace = $disk->where(fn (string $char) => $char === '.')->toArray();
 
-            $disk = preg_replace('/\./', substr($disk, -1), $disk, 1);
-            $disk = substr($disk, 0, -1);
+        foreach ($dotsToReplace as $index => $dot) {
+            $this->option('debug') && $this->comment(implode('', $arrayToReduce));
+
+            if ($index > count($arrayToReduce) - 1) {
+                break;
+            }
+
+            do {
+                $replacement = array_pop($arrayToReduce);
+            } while ($replacement === '.');
+
+            $arrayToReduce[$index] = $replacement;
         }
 
-        $checksum = collect(str_split($disk)) // TODO: convert string to array to work with file ID numbers above 10
-            ->map(fn (string $char, int $index) => $index * (int) $char)
+        $checksum = collect($arrayToReduce)
+            ->map(fn (int $char, int $index) => $index * $char)
             ->sum();
 
         $this->info('Filesystem checksum: ' . $checksum);
