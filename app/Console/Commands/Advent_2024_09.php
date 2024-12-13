@@ -24,36 +24,21 @@ TEXT;
             ->map(function (string $char, int $index) use (&$block) {
                 return $index % 2 === 1
                     ? str_repeat('.', (int) $char)
-                    : str_repeat((string) $block++ % 10, (int) $char);
+                    : str_repeat((string) $block++ % 10, (int) $char); // TODO: remove modulo to work with 10 etc
             })
             ->join('');
 
-        $compactDisk = $this->compact($disk);
+        while (str_contains($disk, '.')) {
+            $this->option('debug') && $this->comment($disk);
 
-        $checksum = collect(str_split($compactDisk))
+            $disk = preg_replace('/\./', substr($disk, -1), $disk, 1);
+            $disk = substr($disk, 0, -1);
+        }
+
+        $checksum = collect(str_split($disk)) // TODO: convert string to array to work with file ID numbers above 10
             ->map(fn (string $char, int $index) => $index * (int) $char)
             ->sum();
 
         $this->info('Filesystem checksum: ' . $checksum);
-    }
-
-    private function compact(string $disk): string
-    {
-        $this->option('debug') && $this->comment($disk);
-
-        $trimmedDisk = trim($disk, '.');
-
-        if (!str_contains($trimmedDisk, '.')) {
-            return $disk;
-        }
-
-        $dotIndex = strpos($disk, '.');
-        $numIndex = strlen($trimmedDisk) - 1;
-
-        $diskParts = str_split($disk);
-        $diskParts[$dotIndex] = $diskParts[$numIndex];
-        $diskParts[$numIndex] = '.';
-
-        return $this->compact(implode($diskParts));
     }
 }
