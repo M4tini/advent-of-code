@@ -30,23 +30,26 @@ TEXT;
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(PHP_EOL, $data);
         $this->dataMatrix = collect($dataLines)->map(fn ($line) => str_split($line))->toArray();
-        $sum = 0;
+        $results = [];
 
         foreach ($this->dataMatrix as $row => $line) {
             foreach ($line as $col => $position) {
                 if ($position === '0') {
-                    $nines = $this->trailheadScore($row, $col);
-                    $sum += count(array_unique($nines));
+                    $results[] = $this->trailheadScore($row, $col);
                 }
             }
         }
 
-        $this->info('Sum of the scores of all trailheads: ' . $sum);
+        $sumOfScores = collect($results)->map(fn (array $result) => count(array_unique($result)))->sum();
+        $sumOfRatings = collect($results)->map(fn (array $result) => count($result))->sum();
+
+        $this->info('Sum of the scores of all trailheads: ' . $sumOfScores);
+        $this->info('Sum of the ratings of all trailheads: ' . $sumOfRatings);
     }
 
     private function trailheadScore(int $row, int $col): array
     {
-        $score = [];
+        $result = [];
 
         $height = (int) $this->dataMatrix[$row][$col];
 
@@ -56,25 +59,21 @@ TEXT;
 
         if (isset($this->dataMatrix[$row - 1][$col]) && intval($this->dataMatrix[$row - 1][$col]) === $height + 1) {
             $this->option('debug') && $this->comment('up ' . $this->dataMatrix[$row - 1][$col]);
-
-            $score = array_merge($score, $this->trailheadScore($row - 1, $col));
+            $result = array_merge($result, $this->trailheadScore($row - 1, $col));
         }
         if (isset($this->dataMatrix[$row + 1][$col]) && intval($this->dataMatrix[$row + 1][$col]) === $height + 1) {
             $this->option('debug') && $this->comment('down ' . $this->dataMatrix[$row + 1][$col]);
-
-            $score = array_merge($score, $this->trailheadScore($row + 1, $col));
+            $result = array_merge($result, $this->trailheadScore($row + 1, $col));
         }
         if (isset($this->dataMatrix[$row][$col - 1]) && intval($this->dataMatrix[$row][$col - 1]) === $height + 1) {
             $this->option('debug') && $this->comment('left ' . $this->dataMatrix[$row][$col - 1]);
-
-            $score = array_merge($score, $this->trailheadScore($row, $col - 1));
+            $result = array_merge($result, $this->trailheadScore($row, $col - 1));
         }
         if (isset($this->dataMatrix[$row][$col + 1]) && intval($this->dataMatrix[$row][$col + 1]) === $height + 1) {
             $this->option('debug') && $this->comment('right ' . $this->dataMatrix[$row][$col + 1]);
-
-            $score = array_merge($score, $this->trailheadScore($row, $col + 1));
+            $result = array_merge($result, $this->trailheadScore($row, $col + 1));
         }
 
-        return $score;
+        return $result;
     }
 }
