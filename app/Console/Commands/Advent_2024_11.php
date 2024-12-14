@@ -21,7 +21,7 @@ TEXT;
     public function handle(): void
     {
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
-        $this->stones = explode(' ', $data);
+        $this->stones = array_map('intval', explode(' ', $data));
 
         for ($i = 0; $i < 25; $i++) {
             $this->blink();
@@ -35,17 +35,18 @@ TEXT;
         $newStones = [];
 
         foreach ($this->stones as $stone) {
-            if ($stone === '0') {
-                $newStones[] = '1';
+            if ($stone === 0) {
+                $newStones[] = 1;
                 continue;
             }
 
-            $length = strlen($stone);
+            $length = (int) floor(log10($stone) + 1);
             if ($length % 2 === 0) {
-                $newStones[] = substr($stone, 0, $length / 2);
-                $newStones[] = (string) (int) substr($stone, $length / 2);
+                $stoneString = (string) $stone;
+                $newStones[] = (int) substr($stoneString, 0, $length / 2);
+                $newStones[] = (int) substr($stoneString, $length / 2);
             } else {
-                $newStones[] = (string) (intval($stone) * 2024);
+                $newStones[] = $stone * 2024;
             }
         }
 
