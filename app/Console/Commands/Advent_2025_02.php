@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class Advent_2025_02 extends Command
 {
-    protected $signature = 'advent:2025:2 {--debug} {--stdin}';
+    protected $signature = 'advent:2025:2 {--stdin}';
 
     protected $description = '2025 - Day 2: Gift Shop';
 
@@ -19,22 +19,36 @@ TEXT;
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(',', $data);
         $invalidIDSum = 0;
+        $invalidIDNew = 0;
 
         foreach ($dataLines as $line) {
             preg_match('/(\d+)-(\d+)/', $line, $matches);
             $rangeStart = (int) $matches[1];
             $rangeEnd = (int) $matches[2];
 
-            for ($i = $rangeStart; $i <= $rangeEnd; $i++) {
-                $length = strlen($i);
+            for ($id = $rangeStart; $id <= $rangeEnd; $id++) {
+                $length = strlen($id);
+
                 if ($length % 2 === 0) {
-                    if (substr($i, 0, $length / 2) === substr($i, $length / 2)) {
-                        $invalidIDSum += $i;
+                    if (substr($id, 0, $length / 2) === substr($id, $length / 2)) {
+                        $invalidIDSum += $id;
+                    }
+                }
+
+                for ($i = 1; $i <= $length; $i++) {
+                    $sequence = substr($id, 0, $i);
+
+                    preg_match('/^(' . $sequence . ')+$/', $id, $matches);
+
+                    if ($matches && $matches[0] !== $matches[1]) {
+                        $invalidIDNew += $id;
+                        continue(2); // Repeating pattern found, no need to further check this ID.
                     }
                 }
             }
         }
 
         $this->info('Sum of invalid IDs: ' . $invalidIDSum);
+        $this->info('Sum of invalid IDs using new rules: ' . $invalidIDNew);
     }
 }
