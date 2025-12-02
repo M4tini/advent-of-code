@@ -53,9 +53,7 @@ TEXT;
             : $this->dial - $remainingClicks + 100;
         $newDial %= 100;
 
-        $this->option('debug') && $this->info(
-            $direction . ' ' . $clicks . ' = FROM ' . $this->dial . ' TO ' . $newDial,
-        );
+        $this->option('debug') && $this->info($direction . ' ' . $clicks . ' FROM ' . $this->dial . ' TO ' . $newDial);
 
         if ($newDial === 0) {
             $this->zeroPassed++;

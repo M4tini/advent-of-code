@@ -30,7 +30,8 @@ sail artisan advent:2024:10 --debug
 sail artisan advent:2024:11 --debug
 sail artisan advent:2024:12 --debug
 
-sail artisan advent:2025:1
+sail artisan advent:2025:1 --debug
+sail artisan advent:2025:2
 ```
 
 ### Options
