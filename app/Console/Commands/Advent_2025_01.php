@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class Advent_2025_01 extends Command
 {
-    protected $signature = 'advent:2025:1 {--stdin}';
+    protected $signature = 'advent:2025:1 {--debug} {--stdin}';
 
     protected $description = '2025 - Day 1: Secret Entrance';
 
@@ -23,31 +23,56 @@ R14
 L82
 TEXT;
 
+    private int $dial = 50;
+    private int $zeroPassed = 0;
+    private int $zeroPointed = 0;
+
     public function handle(): void
     {
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(PHP_EOL, $data);
-        $dial = 50;
-        $password = 0;
 
         foreach ($dataLines as $line) {
             preg_match('/(\D)(\d+)/', $line, $matches);
-            $rotation = $matches[1];
-            $clicks = (int) $matches[2];
 
-            // Rotate the dial
-            $dial = ($rotation === 'L')
-                ? $dial - $clicks % 100
-                : $dial + $clicks % 100;
+            $this->dial = $this->countZero($matches[1], (int) $matches[2]);
+        }
 
-            // Limit to 0 - 99
-            $dial %= 100;
+        $this->info('Password: ' . $this->zeroPointed);
+        $this->info('Password method 0x434C49434B: ' . $this->zeroPassed);
+    }
 
-            if ($dial === 0) {
-                $password++;
+    private function countZero(string $direction, int $clicks): int
+    {
+        // The amount of clicks can contain an amount of full circles (100 clicks)
+        $this->zeroPassed += intval($clicks / 100);
+        $remainingClicks = $clicks % 100;
+
+        $newDial = ($direction === 'R')
+            ? $this->dial + $remainingClicks
+            : $this->dial - $remainingClicks + 100;
+        $newDial %= 100;
+
+        $this->option('debug') && $this->info(
+            $direction . ' ' . $clicks . ' = FROM ' . $this->dial . ' TO ' . $newDial,
+        );
+
+        if ($newDial === 0) {
+            $this->zeroPassed++;
+            $this->zeroPointed++;
+        } else {
+            if ($this->dial !== 0) {
+                if ($direction === 'R' && $newDial < $this->dial) {
+                    $this->zeroPassed++;
+                }
+                if ($direction === 'L' && $newDial > $this->dial) {
+                    $this->zeroPassed++;
+                }
             }
         }
 
-        $this->info('Password: ' . $password);
+        $this->option('debug') && $this->warn('PASSED ' . $this->zeroPassed);
+
+        return $newDial;
     }
 }
