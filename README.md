@@ -14,6 +14,7 @@ Run `sail up -d` and then one of the following advent solutions:
 ```bash
 sail artisan advent:2015:1
 sail artisan advent:2015:2
+sail artisan advent:2015:3
 
 sail artisan advent:2023:1 --debug
 sail artisan advent:2023:2 --debug
