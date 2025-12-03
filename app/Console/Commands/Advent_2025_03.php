@@ -21,23 +21,33 @@ TEXT;
     {
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(PHP_EOL, $data);
-        $totalJoltage = 0;
+        $totalJoltage2 = 0;
+        $totalJoltage12 = 0;
 
         foreach ($dataLines as $bank) {
             $batteries = str_split($bank);
-            $possibilities = [];
 
-            foreach ($batteries as $index => $battery) {
-                $combinations = array_slice($batteries, $index + 1);
-
-                if ($combinations) {
-                    $possibilities[] = $battery . max($combinations);
-                }
-            }
-
-            $totalJoltage += intval(max($possibilities));
+            $totalJoltage2 += (int) $this->bestBatteries($batteries, 2);
+            $totalJoltage12 += (int) $this->bestBatteries($batteries, 12);
         }
 
-        $this->info('Total output joltage: ' . $totalJoltage);
+        $this->info('Total output joltage using 2 batteries: ' . $totalJoltage2);
+        $this->info('Total output joltage using 12 batteries: ' . $totalJoltage12);
+    }
+
+    private function bestBatteries(array $batteries, int $amountToActivate): string
+    {
+        if ($amountToActivate === 1) {
+            return max($batteries);
+        }
+
+        // Find the best battery among the ones that are not needed for the remaining battery $length.
+        $bestBattery = max(array_slice($batteries, 0, count($batteries) - $amountToActivate + 1));
+        $bestBatteryIndex = array_search($bestBattery, $batteries);
+
+        // Continue finding the next best battery, starting the search from the $bestBatteryIndex.
+        $nextBatteries = $this->bestBatteries(array_slice($batteries, $bestBatteryIndex + 1), $amountToActivate - 1);
+
+        return $bestBattery . $nextBatteries;
     }
 }
