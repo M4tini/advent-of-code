@@ -23,37 +23,57 @@ class Advent_2025_04 extends Command
 @.@.@@@.@.
 TEXT;
 
+    private array $dataMatrix = [];
+    private array $removedRolls = [];
+
     public function handle(): void
     {
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(PHP_EOL, $data);
-        $dataMatrix = collect($dataLines)->map(fn (string $item) => str_split($item))->all();
-        $accessible = 0;
+        $this->dataMatrix = collect($dataLines)->map(fn (string $item) => str_split($item))->all();
 
-        foreach ($dataMatrix as $rowIndex => $row) {
+        $this->removeAccessibleRolls();
+
+        $this->info('Forklift accessible rolls of paper: ' . $this->removedRolls[0]);
+        $this->info('Forklift removed rolls of paper: ' . array_sum($this->removedRolls));
+    }
+
+    private function removeAccessibleRolls(): void
+    {
+        $removed = 0;
+        $newDataMatrix = $this->dataMatrix;
+
+        foreach ($this->dataMatrix as $rowIndex => $row) {
             foreach ($row as $colIndex => $col) {
                 if ($col === '@') {
                     $adjacentRolls = [
-                        $dataMatrix[$rowIndex - 1][$colIndex - 1] ?? '.',
-                        $dataMatrix[$rowIndex - 1][$colIndex] ?? '.',
-                        $dataMatrix[$rowIndex - 1][$colIndex + 1] ?? '.',
-                        $dataMatrix[$rowIndex][$colIndex + 1] ?? '.',
-                        $dataMatrix[$rowIndex + 1][$colIndex + 1] ?? '.',
-                        $dataMatrix[$rowIndex + 1][$colIndex] ?? '.',
-                        $dataMatrix[$rowIndex + 1][$colIndex - 1] ?? '.',
-                        $dataMatrix[$rowIndex][$colIndex - 1] ?? '.',
+                        $this->dataMatrix[$rowIndex - 1][$colIndex - 1] ?? '.',
+                        $this->dataMatrix[$rowIndex - 1][$colIndex] ?? '.',
+                        $this->dataMatrix[$rowIndex - 1][$colIndex + 1] ?? '.',
+                        $this->dataMatrix[$rowIndex][$colIndex + 1] ?? '.',
+                        $this->dataMatrix[$rowIndex + 1][$colIndex + 1] ?? '.',
+                        $this->dataMatrix[$rowIndex + 1][$colIndex] ?? '.',
+                        $this->dataMatrix[$rowIndex + 1][$colIndex - 1] ?? '.',
+                        $this->dataMatrix[$rowIndex][$colIndex - 1] ?? '.',
                     ];
+
                     $adjacentRollValues = array_count_values($adjacentRolls);
 
                     if (isset($adjacentRollValues['@']) && $adjacentRollValues['@'] >= 4) {
                         continue;
                     }
 
-                    $accessible++;
+                    $newDataMatrix[$rowIndex][$colIndex] = '.';
+                    $removed++;
                 }
             }
         }
 
-        $this->info('Forklift accessible rolls of paper: ' . $accessible); // 11845 is too high
+        $this->dataMatrix = $newDataMatrix;
+        $this->removedRolls[] = $removed;
+
+        if ($removed !== 0) {
+            $this->removeAccessibleRolls();
+        }
     }
 }
