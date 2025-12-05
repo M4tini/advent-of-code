@@ -57,6 +57,7 @@ sail artisan advent:2025:1 --debug
 sail artisan advent:2025:2
 sail artisan advent:2025:3
 sail artisan advent:2025:4
+sail artisan advent:2025:5
 ```
 </details>
 
