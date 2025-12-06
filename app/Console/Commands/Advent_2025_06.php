@@ -10,19 +10,13 @@ class Advent_2025_06 extends Command
 
     protected $description = '2025 - Day 6: Trash Compactor';
 
-    private string $data = <<<'TEXT'
-123 328  51 64
- 45 64  387 23
-  6 98  215 314
-*   +   *   +
-TEXT;
-
     public function handle(): void
     {
-        $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
-        $dataLines = explode(PHP_EOL, $data);
+        $data = file_get_contents('php://stdin'); // Only using stdin because trailing spaces matter.
+        $dataLines = array_filter(explode(PHP_EOL, $data));
         $homework = [];
         $total = 0;
+        $totalRightToLeft = 0;
         preg_match_all('/\S/', array_pop($dataLines), $operations);
 
         foreach ($dataLines as $line) {
@@ -37,7 +31,29 @@ TEXT;
             $total += $this->reduceWithOperator($homeworkItem, $operations[0][$index]);
         }
 
+        $rightToLeft = [];
+        $rightToLeftIndex = 0;
+        for ($i = strlen($dataLines[0]) - 1; $i >= 0; $i--) {
+            $number = '';
+            for ($j = 0; $j < count($dataLines); $j++) {
+                $number .= $dataLines[$j][$i];
+            }
+            if (intval($number) === 0) {
+                $rightToLeftIndex++;
+            } else {
+                $rightToLeft[$rightToLeftIndex][] = intval($number);
+            }
+        }
+
+        // Right to left needs the operators reversed.
+        $operations[0] = array_reverse($operations[0]);
+
+        foreach ($rightToLeft as $index => $homeworkItem) {
+            $totalRightToLeft += $this->reduceWithOperator($homeworkItem, $operations[0][$index]);
+        }
+
         $this->info('Grand total: ' . $total);
+        $this->info('Grand total right-to-left: ' . $totalRightToLeft);
     }
 
     private function reduceWithOperator(array $items, string $operator): int
