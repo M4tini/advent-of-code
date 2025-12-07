@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class Advent_2025_06 extends Command
 {
-    protected $signature = 'advent:2025:6 {--debug} {--stdin}';
+    protected $signature = 'advent:2025:6 {--stdin}';
 
     protected $description = '2025 - Day 6: Trash Compactor';
 
