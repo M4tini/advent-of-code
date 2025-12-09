@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class Advent_2025_08 extends Command
 {
-    protected $signature = 'advent:2025:8 {--depth=10} {--stdin}';
+    protected $signature = 'advent:2025:8 {--stdin} {--depth=}';
 
     protected $description = '2025 - Day 8: Playground';
 
@@ -58,6 +58,8 @@ TEXT;
                         'p' => $boxP,
                         'q' => $boxQ,
                         'r' => $r,
+                        'px' => $p[0],
+                        'qx' => $q[0],
                     ];
                 }
             }
@@ -65,7 +67,11 @@ TEXT;
 
         // Then we sort the result and process the $depth shortest connections (10 for testing, 1000 for puzzle input).
         usort($junctionDistances, fn (array $a, array $b): int => $a['r'] <=> $b['r']);
-        $junctionBoxesToConnect = array_splice($junctionDistances, 0, (int) $this->option('depth'));
+        $junctionBoxesToConnect = $junctionDistances;
+        if ($depth = (int) $this->option('depth')) {
+            $junctionBoxesToConnect = array_splice($junctionBoxesToConnect, 0, $depth);
+        }
+        $lastJunctionBoxX = 0;
 
         foreach ($junctionBoxesToConnect as $junctionBoxes) {
             foreach ($circuits as $circuitKey => $circuitValues) {
@@ -78,6 +84,7 @@ TEXT;
                     $key = array_find_key($circuits, fn (array $values) => in_array($junctionBoxes['q'], $values));
                     $circuits[$circuitKey] = array_merge($circuitValues, $circuits[$key]);
                     unset($circuits[$key]);
+                    $lastJunctionBoxX = $junctionBoxes['px'] * $junctionBoxes['qx'];
 
                     continue(2);
                 }
@@ -86,19 +93,21 @@ TEXT;
                     $key = array_find_key($circuits, fn (array $values) => in_array($junctionBoxes['p'], $values));
                     $circuits[$circuitKey] = array_merge($circuitValues, $circuits[$key]);
                     unset($circuits[$key]);
+                    $lastJunctionBoxX = $junctionBoxes['px'] * $junctionBoxes['qx'];
 
                     continue(2);
                 }
             }
         }
 
-        // Then we sum the size of the 3 biggest circuits.
+        // Then we find the size of the 3 biggest circuits.
         $size = collect($circuits)
             ->map(fn (array $circuit) => count($circuit))
             ->sortDesc()
             ->splice(0, 3)
             ->all();
 
-        $this->info('Multiplied size of the three largest circuits: ' . array_product($size)); // 5202 too low
+        $this->info('Multiplied size of the three largest circuits: ' . array_product($size));
+        $this->info('Multiplied X coordinates of the last two junction boxes: ' . $lastJunctionBoxX);
     }
 }
