@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Advent_2024;
 
 use Exception;
 use Illuminate\Console\Command;

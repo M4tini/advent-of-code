@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Advent_2015;
 
 use Illuminate\Console\Command;
 
