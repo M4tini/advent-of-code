@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 
 class Advent_2025_05 extends Command
 {
-    protected $signature = 'advent:2025:5 {--stdin}';
+    protected $signature = 'advent:2025:5 {--debug} {--stdin}';
 
     protected $description = '2025 - Day 5: Cafeteria';
 
@@ -23,8 +23,6 @@ class Advent_2025_05 extends Command
 17
 32
 TEXT;
-
-    private array $processedRanges = [];
 
     public function handle(): void
     {
@@ -46,38 +44,29 @@ TEXT;
         }
 
         // Using array_fill() causes memory limits, so we reduce the sorted ranges to a single value.
-        $freshIngredientRangeCount = $ingredientRanges->reduce(function (int $carry, array $range) {
-            foreach ($this->processedRanges as $processedIndex => $processedRange) {
-                // Early return if the new range falls completely within a processed range.
-                if ($processedRange[0] <= $range[0] && $processedRange[1] >= $range[1]) {
-                    return $carry;
-                }
+        $rangeFrom = 0;
+        $freshIngredientRangeCount = $ingredientRanges->reduce(function (int $carry, array $range) use (&$rangeFrom) {
+            $this->option('debug') && $this->info('Checking ' . implode('-', $range) . ' starting from ' . $rangeFrom);
 
-                // Remove the processed range if it falls completely within the new range.
-                if ($processedRange[0] >= $range[0] && $processedRange[1] <= $range[1]) {
-                    unset($processedRange[$processedIndex]);
-                    continue;
-                }
-
-                // Adjust the beginning of the new range to match a processed range if needed.
-                if ($processedRange[0] <= $range[0] && $processedRange[1] >= $range[0]) {
-                    $range[0] = $processedRange[1] + 1;
-                }
-
-                // Adjust the end of the range to match a processed range if needed.
-                if ($processedRange[0] >= $range[0] && $processedRange[1] >= $range[0]) {
-                    $range[1] = $processedRange[0] - 1;
-                }
+            if ($rangeFrom === $range[0] && $rangeFrom === $range[1]) {
+                $this->option('debug') && $this->warn('Special case where we need to do +1');
+                return $carry + 1;
             }
 
-            $this->processedRanges[] = $range;
+            if ($range[1] <= $rangeFrom) {
+                $this->option('debug') && $this->warn('Skipped');
+                return $carry;
+            }
 
-            $this->info('Adding ' . $range[1] . ' - ' . $range[0] . ' = ' . ($range[1] - $range[0] + 1));
+            $add = $range[1] - max($range[0], $rangeFrom) + 1;
+            $this->option('debug') && $this->warn('Added ' . $add);
 
-            return $carry + $range[1] - $range[0] + 1;
+            $rangeFrom = $range[1] + 1;
+
+            return $carry + $add;
         }, 0);
 
         $this->info('Amount of fresh ingredients: ' . $freshIngredientCount);
-        $this->info('Amount of ingredients considered fresh: ' . $freshIngredientRangeCount); // 354179868661316 is too high
+        $this->info('Amount of ingredients considered fresh: ' . $freshIngredientRangeCount);
     }
 }
