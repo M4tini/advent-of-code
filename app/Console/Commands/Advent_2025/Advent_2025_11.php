@@ -25,12 +25,12 @@ TEXT;
 
     private array $devices = [];
 
+    private array $deviceMemory = [];
+
     public function handle(): void
     {
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
         $dataLines = explode(PHP_EOL, $data);
-        $paths = 0;
-        $devices = [];
 
         foreach ($dataLines as $dataLine) {
             preg_match('/(.+): (.+)/', $dataLine, $matches);
@@ -38,23 +38,32 @@ TEXT;
             $this->devices[$matches[1]] = explode(' ', $matches[2]);
         }
 
-        $results = [];
-        $this->findOut([], 'you', $results);
+        $countYou = $this->countPaths('you', true, true, 'out');
+        $countSvr = $this->countPaths('svr', false, false, 'out');
 
-        $this->info('Amount of paths from you to out: ' . count($results));
+        $this->info('Amount of paths from you to out: ' . $countYou);
+        $this->info('Amount of paths from svr to out: ' . $countSvr);
     }
 
-    private function findOut(array $path, string $deviceKey, array &$results): void
+    // Passing array &$results causes memory limits, so the friend suggested to use a global memory to track totals.
+    private function countPaths(string $device, bool $seenDac, bool $seenFft, string $target): int
     {
-        if ($deviceKey === 'out') {
-            $results[] = $path;
-            return;
+        if ($device === 'dac') $seenDac = true;
+        if ($device === 'fft') $seenFft = true;
+
+        if ($device === $target) {
+            return ($seenDac && $seenFft) ? 1 : 0;
         }
 
-        foreach ($this->devices[$deviceKey] as $nextValue) {
-            $path[] = $deviceKey;
-
-            $this->findOut($path, $nextValue, $results);
+        if (isset($this->deviceMemory[$device][$seenDac][$seenFft])) {
+            return $this->deviceMemory[$device][$seenDac][$seenFft];
         }
+
+        $total = 0;
+        foreach ($this->devices[$device] as $nextDevice) {
+            $total += $this->countPaths($nextDevice, $seenDac, $seenFft, $target);
+        }
+
+        return $this->deviceMemory[$device][$seenDac][$seenFft] = $total;
     }
 }
