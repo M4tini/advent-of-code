@@ -62,6 +62,7 @@ sail artisan advent:2025:6
 sail artisan advent:2025:7
 sail artisan advent:2025:8
 sail artisan advent:2025:9
+sail artisan advent:2025:10
 ```
 </details>
 
