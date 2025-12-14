@@ -29,8 +29,6 @@ class Advent_2025_07 extends Command
 ...............
 TEXT;
 
-    private int $timelines = 0;
-
     public function handle(): void
     {
         $data = $this->option('stdin') ? file_get_contents('php://stdin') : $this->data;
@@ -56,32 +54,42 @@ TEXT;
             $currentLine = $nextLine;
         }
 
-        $currentLine = array_shift($dataLines);
-        $currentIndex = strpos($currentLine, 'S');
-
         // The lines which only consist of `.` are not interesting for the timeline count.
-        $dataLines = array_filter($dataLines, fn (string $dataLine) => str_contains($dataLine, '^'));
-
-        $this->findTimelines($currentIndex, $dataLines);
+        $dataLines = array_values(array_filter($dataLines, fn (string $dataLine) => trim($dataLine, '.') !== ''));
+        $timeLineCount = $this->countTimelines($dataLines);
 
         $this->info('Beam splits: ' . $splitCount);
-        $this->info('Amount of timelines: ' . $this->timelines);
+        $this->info('Amount of timelines: ' . $timeLineCount);
     }
 
-    private function findTimelines(int $index, array $dataLines): void
+    // Recursively passing $dataLines and using array_shift() causes memory limits, so the friend suggested to use DP.
+    // This means we collect a list of timeline possibilities while going through each row of the grid (no recursion).
+    private function countTimelines(array $dataLines): int
     {
-        $nextLine = array_shift($dataLines);
+        $cols = strlen($dataLines[0]);
+        $startCol = strpos($dataLines[0], 'S');
 
-        if ($nextLine === null) {
-            $this->timelines++;
-            return;
+        $timeLines = array_fill(0, $cols, 0);
+        $timeLines[$startCol] = 1; // 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0
+
+        foreach ($dataLines as $dataLine) {
+            $lineValues = str_split($dataLine);
+            $next = array_fill(0, $cols, 0);
+
+            foreach ($lineValues as $i => $lineValue) {
+                if ($lineValue === '^') {
+                    // Split the timeline left and right.
+                    $next[$i - 1] += $timeLines[$i];
+                    $next[$i + 1] += $timeLines[$i];
+                } else {
+                    // Keep the timeline while going down.
+                    $next[$i] += $timeLines[$i];
+                }
+            }
+
+            $timeLines = $next;
         }
 
-        if ($nextLine[$index] === '^') {
-            $this->findTimelines($index - 1, $dataLines);
-            $this->findTimelines($index + 1, $dataLines);
-        } else {
-            $this->findTimelines($index, $dataLines);
-        }
+        return array_sum($timeLines); // 1 0 2 0 10 0 11 0 11 0 2 1 1 0 1
     }
 }
